@@ -1,98 +1,10 @@
 <!DOCTYPE html>
 <html>
-    <style>
-        body{
-            background: linear-gradient(to right, #1e1e2f, #1e2f29);
-            color: #50507a;
-            font-family: Arial, Helvetica, sans-serif;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .panel {
-            background-color: #3a3a5c;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #F8F3CE;
-        }
-
-        .Button
-        {
-            background-color: #3a3a5c;
-            border-radius: 5px;
-            padding: 2px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 6px 15px rgba(0,0,0,.2);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-        .Button img{
-            width:80%;
-            height:auto;
-        }
-        .Button.text p,
-        .Button.text h2,
-        .Button .text{
-            flex:1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-            color: #f5f5f5;
-        }
-        .Button:hover
-        {
-            transform: scale(1.005);
-            background-color: #50507a;
-        }
-        .Button:hover .text p,
-        .Button:hover .text h2, 
-        .Button:hover .text {
-            color: #f5f5f5;
-        }
-        a{
-            text-decoration: none;
-            color: inherit;
-        }
-        .HeaderRow{
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .HeaderButton {
-            background-color: #3a3a5c;
-            border-radius: 5px;
-            padding: 2px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-        .HeaderButton h5{
-            color: #f5f5f5;
-        }
-        .HeaderButton:hover {
-            transform: scale(1.05);
-            background-color: #50507a;
-        }
-
-        
-    </style>
+    <link rel="stylesheet" href="BaseStyle.css">
     <head>
         <title> Sid's Projects </title>
     </head>
+
     <body>
         <div class="HeaderRow">
             <h1> Sid's Projects </h1>
@@ -107,7 +19,7 @@
             <div class = "Button">
                 <div class = "text">
                 <h2> Particle Life </h2>
-                <p> Information on Particle Life Simulation </p>
+                <p style=""> Information on Particle Life Simulation </p>
                 </div>
                 <img src="particleLife.png" alt="Particle Icon">
             </div>
