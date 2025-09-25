@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<head> 
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <link rel="stylesheet" href="ArticleStyle.css">
+</head>
+<body>
+    
+<h1 style = "color:#F8F3CE;"> A* </h1>
+
+<div class="container">
+<h2> What is A* </h2>
+<p>
+    A* (pronounced A-Star) is an algorithm to find one of the shortest paths between two objects. 
+    It is used in fields as numerous as robotics, game development, and even YOUR GPS system. 
+    Other algorithms can find one of the closest path between two points, 
+    but A* can find this path more efficiently and methodically. 
+    It uses a heuristic (in this case it just calculates distance from the selected point and target) 
+    function/value to optimize. 
+</p>
+
+<h2> Understanding </h2>
+<p>
+	For most applications of A* you have a grid to go across. 
+    To show how A* finds a path look at this video by Sebastian Lauge:
+
+    <a href="https://www.youtube.com/watch?v=-L-WgKMFuhE" style = "color: #7d6ffd;"> 
+        https://www.youtube.com/watch?v=-L-WgKMFuhE
+    </a>
+    .
+
+    He has a whole series on A*, but I only watched this video for understanding the algorithm.
+     
+    The A* algorithm works with 2 main variables for each node (or square in the grid, in this case); a g value and an h value.
+    The g value is the cost to move from the current node to its neighbour, while the h value is the heuristic.
+    The h value is value to move from the current node to the end node. Both are defined with the same distance function.
+    \[ 
+    Distance = \sqrt{(A_x-B_x)^2 + (A_y-B_y)^2} 
+    \]
+    Where A is the current node and B is the neighbour node in the case of g, and the end node in the case of h. 
+    g has 2 possible values 1 for horizontal and vertical directions, and the square root of 2 for diagonal directions.
+    H has varying cost however.
+    A variable that results from the sum of g and h is f. f is the total cost. Since we try to make f as small as possible,
+    A* is really a minimzation algorithm of f. On paper, you simply pick the nodes with the smallest f values, evaluate them,
+    and then evaluate their neighbours, with the smallest values, until you reach the end.
+</p>
+
+<h2> Psuedocode </h2>
+<h2> Code </h2>
+<p>
+I made this code in unity c#. I tried to make the explanation available to anyone, 
+so I will go into a lot of detail on the basis.
+</p>
+
+<p>
+    This is a class or datatype that the programmer creates with reusable features. Each grid position has one of these nodes to represent it. It holds the f cost and its components: g and h. It also has a parent (for path construction), cell type, and position.
+</p>
+
+<pre> <code class="language-cs">
+public class Node
+{
+    public Node parent; //This is the Node that the current Node has come from
+    public Vector2Int position; //The position of the Node (integer) with x and y components
+    public float g; //The cost to move. Either 1 or the square root of 2
+    public float h; //The distance from this node to the end
+    public float f; //The true cost. g + h
+    public Cell cell; //What type of grid position is this
+    public enum Cell
+    {
+        Open = 0,//Available for movement (kinda confusing with OpenList, I know)
+        Closed = 1,//Unavailable for movement
+        Start = 2,//The start node
+        End = 3,// The end node
+    }
+    
+    public void GetFCost()
+    {
+        f = h + g;//calculate the f cost as h + g
+    }
+</code> </pre>
+
+<p>
+Below is all the ways to construct a node (constructor).
+</p>
+<pre> <code class="language-cs">
+    public Node(Node Parent, Vector2Int Position, float G, float H)//Initialization method 
+    {
+        this.parent = Parent;
+        this.position = Position;
+        this.g = G;
+        this.h = H;
+    }
+    public Node(Vector2Int Position, Cell Cell, float H)//Initialization method 
+    {
+        this.position = Position;
+        this.cell = Cell;
+        this.h = H;
+    }
+    public Node(Vector2Int Position, Cell Cell)//Initialization method 
+    {
+        this.position = Position;
+        this.cell = Cell;
+    }
+    public Node()//Initialization method. Empty.
+    {
+
+    }
+}
+</pre> </code>
+<p>
+This is the main pathfinding function
+</p>
+<pre> <code class="language-cs">
+    public void PathFind()
+    {
+</pre> </code>
+<p>
+Make a grid of nodes with dimension * dimension elements. There is also a closedList. The closed List is a hashset. For all purposes, here, the hashset is used because it stores a bunch of data that can be scanned easily. All candidate nodes for the path are placed in this hashset after evaluation to make sure that they aren’t evaluated for no purpose later.
+</p>
+<pre> <code class="language-cs">
+        grid = new Node[dimension, dimension]; //A grid like the x and y axis
+
+        closedList = new HashSet<Node>(); //Basically a list with no input index. 
+            //It just compares every element in it really fast
+
+</pre> </code>
+<p>
+Initialize each element in the grid as open or closed (floor and wall tiles). I decided to use Perlin Noise for this, but you don’t need to know it for A*.
+<pre> <code class="language-cs">
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++) //Loop through each x and y value in the grid
+            {
+                float sample = Mathf.PerlinNoise((x + seed) * .1f, (y + seed) * .1f); 
+                //Just a perlin noise function. (Not Important)
+                if (sample >= floorThreshold) //Make the node Open
+                {
+                    grid[x, y] = new Node(new Vector2Int(x, y), Node.Cell.Open,
+                     DirectionDistance(new Vector2Int(x, y), endPos));
+                    //Set the values of a node
+                    //The DirectionDistance is the h cost
+                    Instantiate(floor, new Vector2(x, y), Quaternion.identity); 
+                    //Instantiate or create a tile at this position
+                }
+                else //Make the node Closed
+                {
+                    grid[x, y] = new Node(new Vector2Int(x, y), Node.Cell.Closed, 
+                    DirectionDistance(new Vector2Int(x, y), endPos)); 
+                    //Set the values of a node
+                    Instantiate(wall, new Vector2(x, y), Quaternion.identity); //Make a wall
+                    closedList.Add(grid[x, y]); //Add to the closed list
+                }
+            }
+        }
+</pre> </code>
+<p>
+Initialize a node, with a decided position, to be the start node. 
+<pre> <code class="language-csharp">
+        Node startNode = grid[startPos.x, startPos.y]; //Set the startNode
+        startNode.g = 0; //Make the g cost (cost to go from the parent to this) 0. 
+                        //This happens because you spawn here and don't move.
+        startNode.GetFCost(); //Set the f cost
+
+</pre> </code>
+<p>
+Make a list of nodes (basically a, changing, quantity of nodes that each have a corresponding integer key/index), openList, to store all the nodes that can be evaluated. It only begins with the start node in it.
+</p>
+<pre> <code class="language-csharp">
+openList = new List<Node>() { startNode }; //Make a list, basically an array without a set max 
+            //number of elements. It has an integer value that points to a Node.
+            //It has startNode only, originally.
+
+</pre> </code>
+<p>
+Make a temporary node that is ultimately the best node for each instance of the loop that plays when the openList has elements.
+</p>
+<pre> <code class="language-csharp">
+        Node current = new Node(); //The current node. It is not set yet
+        while (openList.Count > 0) //While the openList has elements
+        {
+            current = GetLowestFCost(openList); //Get the node with the lowest cost,
+                                            // from the openList.
+
+            if (current.position == endPos) //If the current 
+                                        //position is the same as the end position
+            {
+                ReconstructPath(); //Explained later
+                Debug.Log("Found"); //Show that it is found
+                return; //End the loop and pathfinding code
+            }
+
+</pre> </code>
+<p>
+Show that you have calculated the current node.
+</p>
+<pre> <code class="language-csharp">
+            openList.Remove(current); //Remove the current node from the openList
+            closedList.Add(current); //Add the current node to the closedList
+                                     //Do this because both have been evaluated  
+</pre> </code>
+<p>
+Get the neighbours of the current node and add them to the openList if the list does not contain them. 
+</p>
+<pre> <code class="language-csharp">
+            foreach (Vector2Int pos in ReturnNeighbours(current.position)) //Get the positions
+            // of the neighbours of current (close nodes). The function is explained below.
+            {
+                if (!Bound(pos)) continue; //If the position is outside of the 
+                                        //array end this foreach loop iteration
+                Node neighbour = grid[pos.x, pos.y];  //Get the node value from the position value
+
+                if (closedList.Contains(neighbour)) continue; //If this node has already been 
+                //evaluated, and placed in the closed list, end this foreach loop iteration
+
+                float GD = current.g + DirectionDistance(current.position, neighbour.position); 
+                //Basically the current path's g cost.
+
+                if (!openList.Contains(neighbour) || GD < neighbour.g) //If the openList does not 
+                //contain this neighbour, or if this new path has a lower g (distance) cost
+                {
+                    neighbour.g = GD; //Set the neighbour's g cost to GD
+                    neighbour.h = DirectionDistance(neighbour.position, endPos); //Set the h cost
+                    neighbour.GetFCost(); //Calculate the f cost.
+                    neighbour.parent = current; 
+                    //Set the parent of the neighbour to the current node, for path reconstruction
+
+                    if (!openList.Contains(neighbour)) 
+                    //If the openList does not contain the neighbour node 
+                    {
+                        openList.Add(neighbour); //Add the neighbour node
+                    }
+                }
+            }
+        }
+        Debug.Log("Not Found"); //If the loop terminates without finding a path say it.
+    }
+</pre> </code>
+<p>
+These are the helper functions. The first reconstructs the path by going from the end node to the start node using the parent variable of each node. The second checks if a position is within the bounds of the grid. The third gets the node with the lowest f cost from a list of nodes. The fourth calculates distance between two points. The fifth gets the neighbours of a position.
+</p>
+<pre> <code class="language-csharp">
+ public void ReconstructPath() //To get the path from the start to the end
+ {
+     Node current = grid[endPos.x, endPos.y]; //The current position. Begins as the end position.
+     while(current != null) 
+     //If the current position exists. Important when you reach the start node.
+     {
+         Instantiate(marker, new Vector3(current.position.x, current.position.y, 0),
+         Quaternion.identity); //Create a marker of the path
+         current = current.parent; //Set the temporary current node to its parent
+     }
+ }
+
+ public bool Bound(Vector2Int pos) //Check if the position exists
+ {
+     //Basically if x or y is more than zero (positive) or less than the dimension return true
+     if (pos.x >= 0 && pos.y >= 0 && pos.x < dimension && pos.y < dimension) return true;
+     return false; //If x or y are less than zero (negative),
+     // or more than or equal to the dimension of the grid return false
+ }
+ public Node GetLowestFCost(List<Node> nodes) //Get the node with the lowest f cost.
+ {
+     Node best = nodes[0]; //Begin with the current best node. Lets begin with the first
+     foreach (Node node in nodes) //Loop through all nodes
+     {
+         if (best.f >= node.f) best = node; //Since we are trying to minimize the f cost,
+         // set the best node to the one with the lowest f cost
+     }
+     return best; //return the best node
+ }
+ public static float DirectionDistance(Vector2Int start, Vector2Int end) 
+ //Get the distance from a to b. This is the typical method with the Pythagorean Theorem.
+ {
+     float x = (start.x - end.x) * (start.x - end.x); //Square the x distance from a to b
+     float y = (start.y - end.y) * (start.y - end.y); //Square the y distance from a to b
+
+     return Mathf.Sqrt(x + y); 
+     //Square root it to find the true, straight line, or angled distance
+ }
+
+ public static Vector2Int[] ReturnNeighbours(Vector2Int pos) //Get the current position
+ {
+     Vector2Int[] Difference =
+     {
+         new Vector2Int(1,0),
+         new Vector2Int(1,1),
+         new Vector2Int(0,1),
+         new Vector2Int(-1,1),
+         new Vector2Int(-1,0),
+         new Vector2Int(-1,-1),
+         new Vector2Int(0,-1),
+         new Vector2Int(1,-1),
+     }; //Basically all the vectors/displacements to go to the neighbour
+
+     Vector2Int[] temp = new Vector2Int[8]; 
+     //An array with 8 elements, that represent the displaced positions
+     for(int i = 0; i < 8; i++) //For every element in temp
+     {
+         temp[i] = Difference[i] + pos; //Get the displacement
+         if (temp[i].x < 0 || temp[i].y < 0) //If it is not bounded
+         {
+             temp[i] = Vector2Int.zero; //Return zero
+         }
+     }
+
+     return temp; //Return the temp array
+ }
+</pre> </code>
+</div>
+
+
+
+</body>
+
