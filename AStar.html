@@ -14,22 +14,23 @@
 <body>
     
 <h1 style = "color:#F8F3CE;"> A* </h1>
-
+<img src="AStarBigExample.png" alt="Particle Icon" 
+style="display: block; margin: 0 auto; width: 80%; height: auto;">
 <div class="container">
 <h2> What is A* </h2>
 <p>
-    A* (pronounced A-Star) is an algorithm to find one of the shortest paths between two objects. 
-    It is used in fields as numerous as robotics, game development, and even YOUR GPS system. 
-    Other algorithms can find one of the closest path between two points, 
+    A* (pronounced A-Star) is an algorithm to find one of the shortest paths between two points on a grid. 
+    It is used in fields as numerous as robotics, game development, and even travel route finding. 
+    Other algorithms can find the closest path between two points, 
     but A* can find this path more efficiently and methodically. 
-    It uses a heuristic (in this case it just calculates distance from the selected point and target) 
-    function/value to optimize. 
+    It uses a heuristic, or estimated cost function, to reach this efficiency 
+    (in this case it just calculates distance from the selected point and target). 
 </p>
 
 <h2> Understanding </h2>
 <p>
-	For most applications of A* you have a grid to go across. 
-    To show how A* finds a path look at this video by Sebastian Lauge:
+	For most applications of A* you have a grid system, like a coordinate plane. 
+    To show A* look at this video by Sebastian Lague:
 
     <a href="https://www.youtube.com/watch?v=-L-WgKMFuhE" style = "color: #7d6ffd;"> 
         https://www.youtube.com/watch?v=-L-WgKMFuhE
@@ -40,27 +41,81 @@
      
     The A* algorithm works with 2 main variables for each node (or square in the grid, in this case); a g value and an h value.
     The g value is the cost to move from the current node to its neighbour, while the h value is the heuristic.
-    The h value is value to move from the current node to the end node. Both are defined with the same distance function.
+    As explained earlier, the heuristic is the value to move from the current node to the end node. 
+    Both are defined with the same distance function:
     \[ 
     Distance = \sqrt{(A_x-B_x)^2 + (A_y-B_y)^2} 
     \]
-    Where A is the current node and B is the neighbour node in the case of g, and the end node in the case of h. 
-    g has 2 possible values 1 for horizontal and vertical directions, and the square root of 2 for diagonal directions.
-    H has varying cost however.
-    A variable that results from the sum of g and h is f. f is the total cost. Since we try to make f as small as possible,
-    A* is really a minimzation algorithm of f. On paper, you simply pick the nodes with the smallest f values, evaluate them,
-    and then evaluate their neighbours, with the smallest values, until you reach the end.
+    Where A is the current node, and B is the neighbour node in the case of g, and the end node in the case of h. 
+    g has 2 possible values: 1 for horizontal and vertical directions, and the square root of 2 for diagonal directions.
+    h has a varying cost, however.
+    f is the variable that results from the sum of g and h. f is the total cost. Since we try to make f as small as possible,
+    A* is really a minimization algorithm of f. On paper, you simply pick the nodes with the smallest f values, evaluate them,
+    and then evaluate their neighbours with the same minimization in mind till you reach the end.
 </p>
 
-<h2> Psuedocode </h2>
+<h2> Pseudocode </h2>
+<p>
+This is basically the schematics:
+</p>
+<pre>
+<code class="language-cs">
+Make a grid of Nodes
+Make a closedList of Nodes with no elements as a HashSet
+
+foreach position in the grid
+    if position is walkable
+        make node available to move around
+    else
+        make node at position closed
+        add node to closedList
+
+Set the startNode up in the grid with it's h, g, and f values
+
+Make an openList of Nodes with a beginning element of startNode
+
+Make a temporary Node named current
+
+While the openList has elements
+    Set the current node to the node in openList with the lowest f cost
+    if current position is the same as the end position
+        Reconstruct the path by going from the end node's parent to its parent, 
+        and so on and so forth, till you reach the start node
+        
+        End the loop 
+    Remove the current node from the openList
+    Add the current node to the closedList
+
+    foreach position in the neighbours of the current Node
+        if the position is out of bounds
+            end this foreach loop iteration
+
+        Set the Node called neighbour to the node at this grid position
+
+        if the closedList contains neighbour
+            end this foreach loop iteration
+
+        Set float GD to current.g + distance from current to neighbour
+
+        if the openList does not contain neighbour or GD < neighbour's g cost
+            Set neighbour.g to GD
+            Set neighbour.h to the distance from neighbour to end
+            Calculate neighbour.f
+            Set neighbour.parent to current
+
+            if the openList does not contain neighbour
+                Add neighbour to openList
+</code>
+</pre>
 <h2> Code </h2>
 <p>
-I made this code in unity c#. I tried to make the explanation available to anyone, 
+I made this code in Unity C#. I tried to make the explanation available to anyone, 
 so I will go into a lot of detail on the basis.
+Here is the code:
 </p>
 
 <p>
-    This is a class or datatype that the programmer creates with reusable features. Each grid position has one of these nodes to represent it. It holds the f cost and its components: g and h. It also has a parent (for path construction), cell type, and position.
+    This is a class or data type that the programmer creates with reusable features. Each grid position has one of these nodes to represent it. It holds the f cost and its components: g and h. It also has a parent (for path construction), cell type, and position.
 </p>
 
 <pre> <code class="language-cs">
@@ -82,12 +137,12 @@ public class Node
     
     public void GetFCost()
     {
-        f = h + g;//calculate the f cost as h + g
+        f = h + g;//calculates the f cost as h + g
     }
 </code> </pre>
 
 <p>
-Below is all the ways to construct a node (constructor).
+Below are all the ways to construct a node (constructor).
 </p>
 <pre> <code class="language-cs">
     public Node(Node Parent, Vector2Int Position, float G, float H)//Initialization method 
@@ -113,16 +168,20 @@ Below is all the ways to construct a node (constructor).
 
     }
 }
-</pre> </code>
+</code> </pre>
 <p>
 This is the main pathfinding function
 </p>
 <pre> <code class="language-cs">
     public void PathFind()
     {
-</pre> </code>
+    </code> </pre>
 <p>
-Make a grid of nodes with dimension * dimension elements. There is also a closedList. The closed List is a hashset. For all purposes, here, the hashset is used because it stores a bunch of data that can be scanned easily. All candidate nodes for the path are placed in this hashset after evaluation to make sure that they aren’t evaluated for no purpose later.
+You start with a grid of nodes with (dimension * dimension) elements. Then you make a closedList with no beginning elements. 
+The closedList is a hashset. For all purposes, here, 
+the hashset is used because it stores a bunch of data that can be scanned easily.
+After node evaluation, all candidate nodes for the path are placed in the closedList to make sure they 
+aren’t evaluated, for no purpose, later.
 </p>
 <pre> <code class="language-cs">
         grid = new Node[dimension, dimension]; //A grid like the x and y axis
@@ -130,9 +189,10 @@ Make a grid of nodes with dimension * dimension elements. There is also a closed
         closedList = new HashSet<Node>(); //Basically a list with no input index. 
             //It just compares every element in it really fast
 
-</pre> </code>
+        </code> </pre>
 <p>
-Initialize each element in the grid as open or closed (floor and wall tiles). I decided to use Perlin Noise for this, but you don’t need to know it for A*.
+Initialize each element in the grid as open or closed (floor and wall tiles). 
+I decided to use Perlin Noise for this, but you don’t need to know it for A*.
 <pre> <code class="language-cs">
         for (int x = 0; x < dimension; x++)
         {
@@ -159,34 +219,37 @@ Initialize each element in the grid as open or closed (floor and wall tiles). I 
                 }
             }
         }
-</pre> </code>
+    </code> </pre>
 <p>
-Initialize a node, with a decided position, to be the start node. 
-<pre> <code class="language-csharp">
+Initialize a node, with a defined position, to be the start node. 
+<pre> <code class="language-cs">
         Node startNode = grid[startPos.x, startPos.y]; //Set the startNode
         startNode.g = 0; //Make the g cost (cost to go from the parent to this) 0. 
                         //This happens because you spawn here and don't move.
         startNode.GetFCost(); //Set the f cost
 
-</pre> </code>
+</code> </pre>
 <p>
-Make a list of nodes (basically a, changing, quantity of nodes that each have a corresponding integer key/index), openList, to store all the nodes that can be evaluated. It only begins with the start node in it.
+Make a list of nodes (basically a, changing, quantity of nodes that each have a corresponding integer index),
+ called the openList,
+ to store all the nodes that can be evaluated. It only begins with the start node in it.
 </p>
-<pre> <code class="language-csharp">
+<pre> <code class="language-cs">
 openList = new List<Node>() { startNode }; //Make a list, basically an array without a set max 
             //number of elements. It has an integer value that points to a Node.
-            //It has startNode only, originally.
+            //It has the startNode only, originally.
 
-</pre> </code>
+</code> </pre>
 <p>
-Make a temporary node that is ultimately the best node for each instance of the loop that plays when the openList has elements.
+First make a temporary, "current", node. While, the openList has elements 
+you make the temporary node the node with the lowest f cost, until the temporary node is the end node.
 </p>
-<pre> <code class="language-csharp">
+<pre> <code class="language-cs">
         Node current = new Node(); //The current node. It is not set yet
         while (openList.Count > 0) //While the openList has elements
         {
             current = GetLowestFCost(openList); //Get the node with the lowest cost,
-                                            // from the openList.
+                                            //from the openList.
 
             if (current.position == endPos) //If the current 
                                         //position is the same as the end position
@@ -196,25 +259,25 @@ Make a temporary node that is ultimately the best node for each instance of the 
                 return; //End the loop and pathfinding code
             }
 
-</pre> </code>
+        </code> </pre>
 <p>
 Show that you have calculated the current node.
 </p>
-<pre> <code class="language-csharp">
+<pre> <code class="language-cs">
             openList.Remove(current); //Remove the current node from the openList
             closedList.Add(current); //Add the current node to the closedList
                                      //Do this because both have been evaluated  
-</pre> </code>
+</code> </pre>
 <p>
 Get the neighbours of the current node and add them to the openList if the list does not contain them. 
 </p>
-<pre> <code class="language-csharp">
+<pre> <code class="language-cs">
             foreach (Vector2Int pos in ReturnNeighbours(current.position)) //Get the positions
-            // of the neighbours of current (close nodes). The function is explained below.
+            //of the neighbours of the current node (nodes that are close by).
             {
                 if (!Bound(pos)) continue; //If the position is outside of the 
                                         //array end this foreach loop iteration
-                Node neighbour = grid[pos.x, pos.y];  //Get the node value from the position value
+                Node neighbour = grid[pos.x, pos.y]; //Get the node from the position value
 
                 if (closedList.Contains(neighbour)) continue; //If this node has already been 
                 //evaluated, and placed in the closed list, end this foreach loop iteration
@@ -241,11 +304,11 @@ Get the neighbours of the current node and add them to the openList if the list 
         }
         Debug.Log("Not Found"); //If the loop terminates without finding a path say it.
     }
-</pre> </code>
+</code> </pre>
 <p>
 These are the helper functions. The first reconstructs the path by going from the end node to the start node using the parent variable of each node. The second checks if a position is within the bounds of the grid. The third gets the node with the lowest f cost from a list of nodes. The fourth calculates distance between two points. The fifth gets the neighbours of a position.
 </p>
-<pre> <code class="language-csharp">
+<pre> <code class="language-cs">
  public void ReconstructPath() //To get the path from the start to the end
  {
      Node current = grid[endPos.x, endPos.y]; //The current position. Begins as the end position.
@@ -273,7 +336,7 @@ These are the helper functions. The first reconstructs the path by going from th
          if (best.f >= node.f) best = node; //Since we are trying to minimize the f cost,
          // set the best node to the one with the lowest f cost
      }
-     return best; //return the best node
+     return best; //Return the best node
  }
  public static float DirectionDistance(Vector2Int start, Vector2Int end) 
  //Get the distance from a to b. This is the typical method with the Pythagorean Theorem.
@@ -303,7 +366,7 @@ These are the helper functions. The first reconstructs the path by going from th
      //An array with 8 elements, that represent the displaced positions
      for(int i = 0; i < 8; i++) //For every element in temp
      {
-         temp[i] = Difference[i] + pos; //Get the displacement
+         temp[i] = Difference[i] + pos; //Get the displaced position
          if (temp[i].x < 0 || temp[i].y < 0) //If it is not bounded
          {
              temp[i] = Vector2Int.zero; //Return zero
@@ -312,10 +375,44 @@ These are the helper functions. The first reconstructs the path by going from th
 
      return temp; //Return the temp array
  }
-</pre> </code>
+</code> </pre>
+
+<h2> Final Statements </h2>
+<p>
+A quick thing to note that is that I used Euclidean distance for the heuristic (h value) even though there were other options.
+I also made a slight oversight in the code by allowing A* to clip through diagonal walls like below
+(Grey is the wall, white is the floor, and red is the path marker). This can be fixed by checking all the nodes
+in the cardinal directions when moving diagonally.
+</p>
+<img src="AStarPath.png" alt="Particle Icon" 
+style="display: block; margin: 0 auto; width: 40%; height: auto;">
+
+<p>
+All in all, I hope this explanation was helpful. A* is a very useful tool in many fields. There is a github repository, by me, that you
+can look at. Also, (completely off topic) an interesting thought I had when making this project was how 
+humans are naturally ingrained with good pathfinding skills. 
+It takes such a complex algorithm to mimic something that man can do so easily. That is fascinating. I might explore 
+this topic with possibly a machine learning algorithm that is played against A* and humans. I also might do a 
+project on robot pathfinding with A*, so stayed updated if interested. With that I would like to thank you for reading.
+</p>
+
+<h2> Sources & Thanks </h2>
+<p>
+It would not be right if I did not become clear with my use of AI. I used ChatGPT with making this code, but I 
+believe this article is a testament to my improved understanding of this topic.
+</p>
+<pre>
+    <a href = "https://en.wikipedia.org/wiki/A*_search_algorithm" style = "color: #7d6ffd;">
+    https://en.wikipedia.org/wiki/A*_search_algorithm </a>
+    <a href = "https://www.youtube.com/watch?v=-L-WgKMFuhE" style = "color: #7d6ffd;">
+    https://www.youtube.com/watch?v=-L-WgKMFuhE
+    </a>
+</pre>
 </div>
-
-
-
+<a href = "index.html">
+    <div class="Button">
+        <h1> Homepage </h1>
+    </div>
+</a>
 </body>
 
