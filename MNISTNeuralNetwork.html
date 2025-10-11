@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<head> 
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+    <link rel="stylesheet" href="ArticleStyle.css">
+</head>
+<body>
+<h1 style = "color:#F8F3CE;"> MNIST Neural Network </h1>
+<a href = "https://www.youtube.com/watch?v=hFIcHHJXe5Q">
+<img src="NeuralNetworkPhotos/NNExample.png" alt="Neural Network Example" 
+style="display: block; margin: 0 auto; width: 100%; height: auto;">
+<h1 style ="font-size: 1rem; display: block; margin: 0 auto;"> Click Image For Video </h1>
+</a>
+
+<div class="container">
+<h2>Opening Comments</h2>
+<p>
+  This article showcases my handwritten digit AI based on the MNIST dataset.
+  I am not an expert in machine learning, but I will try my best to explain the basics.
+  This means I won’t go into all the really complicated stuff. 
+  I would highly recommend using all the sources linked below.
+  I made this project with no machine learning libraries, just pure C# code, displayed in the Unity Game Engine.
+  The code will be posted in a github repo on my account.
+</p>
+<h2>Introduction</h2>
+<p>
+Imagine a 28 by 28 grid of grayscale pixels, 784 in total.
+Now imagine that grid is a drawing of a number, between 0 and 9, like 3 for instance.
+</p>
+<img src="NeuralNetworkPhotos/Number Example.png" alt="MNIST Example" style="display: block; margin: 0 auto; width: 40%; height: auto;">
+<p>
+Then imagine that there are 1000s of pixel grids that need to be sorted as a particular number.
+How would you make a computer program to recognize one drawing correctly if you would also need
+it to be accurate for all the other examples? This is the typical “Hello World” of neural network problems.
+</p>
+<h2>Basic Summary</h2>
+<p>
+The procedure for making it is below:
+
+First you parse the MNIST dataset for input data, representing a grayscale (black and whtie) picture.
+
+You use the parsed data to make 784 inputs called neurons, organized in an array called a layer. 
+Each layer has an activation or value between 0 and 1 (black to white). 
+</p>
+<img src="NeuralNetworkPhotos/Gradient.png" alt="Gradient: 0 -> 1" style="display: block; margin: 0 auto; width: 100%; height: auto;">
+<p>
+These values affect the further values of neurons in the next layers.
+
+The value of a non input layer neuron is defined by the values of the activations from the layer preceding it. 
+Each pair of past layer neuron to current layer neuron has a float value called the weight. 
+You multiply the weight by the previous layer activation. 
+You then sum up all the weighted products with a float value called the bias.
+This value is then put into a function to simplify it into an activation.
+I used a sigmoid to put the value between 0 and 1. The function is below:
+</p>
+
+<iframe src="https://www.desmos.com/calculator/rbi3h6urcg?embed" width="500" height="500" frameborder=0 
+style="display: block; margin: 0 auto;"></iframe>
+
+<p>
+\[
+ \text{Sigmoid: } σ(x) = \frac{1}{1 + e^{-x}}
+\]
+
+As you can see the sigmoid looks like an S, that approaches the values of 0 and 1, but never crosses them.
+</p>
+<p>
+Also, on initialization the network is horrible. It would probably have an accuracy around 10%. 
+To fix this make the network “learn”.
+
+Learning begins with a cost (how bad the netowork is) followed by cost reduction analysis to ensure the network performs better in its next iteration.
+The process of fixing the overall cost, after defining it, is called backpropagation.
+</p>
+<h2>My Project</h2>
+<p>
+My project has an accuracy of 95.85%. Which is good for hobbyists (state of the art is higher than 99%).
+To illustrate, the network is able to identify hard examples like this:  
+</p>
+<img src="NeuralNetworkPhotos/HorriblyMADE4.png" alt="Hard Number to Categorize" style="display: block; margin: 0 auto; width: 40%; height: auto;">
+<p>
+with okay accuracy. If you didn't know this is supposed to be a 4.
+Without these hard ones the network would never be able to identify bad written digits. 
+Basically, a hard example like this make a more robust network. 
+</p>
+<h2>Conclusion</h2>
+<p>
+The process of making a computer “learn” is very fascinating.
+The way rules can bring a simple math function from random to almost absolute in accuracy is amazing.
+I am proud of making this network, with no libraries, but I still have a long way to go before becoming an expert.
+I believe I will work more on projects like this in the future.
+</p>
+
+<h2> About Using AI </h2>
+<p>
+  I did use AI for this project. ChatGPT helped me with most of the code.
+  At the time I did not know the relevant mathematics, such as calculus or unknown linear algebra topics, for this project.
+  I really wanted to make a neural network project, however, so I used AI to help me (kind of, funny I know).
+  For projects where I use AI, I always make sure to understand the code it gives me.
+  So, that's why I can't really call myself an expert. In the future I want to be able
+  to code hard projects like this myself, and I think with effort I will. For all projects that use AI
+  I will disclose my use of it. With that I want to thank you for reading.
+</p>
+<h2>References and Learning Resources</h2>
+<pre>
+The first 4 are an amazing series by 3Blue1Brown. I highly recommend watching them all.
+<a href = "https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=1">
+https://www.youtube.com/watch?v=aircAruvnKk&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=1
+</a>
+<a href = "https://www.youtube.com/watch?v=IHZwWFHWa-w&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=2">
+https://www.youtube.com/watch?v=IHZwWFHWa-w&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=2
+</a>
+<a href = "https://www.youtube.com/watch?v=Ilg3gGewQ5U&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=3">
+https://www.youtube.com/watch?v=Ilg3gGewQ5U&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=3
+</a>
+<a href = "https://www.youtube.com/watch?v=tIeHLnjs5U8&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=4">
+https://www.youtube.com/watch?v=tIeHLnjs5U8&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=4 
+</a>
+This is also a very good video for learning how to parse the MNIST dataset.
+<a href = "https://www.youtube.com/watch?v=NS2FI6vR3BY">
+https://www.youtube.com/watch?v=NS2FI6vR3BY
+</a>
+I didn’t use this one much but its good. It basically the 3Blue1Brown series but as multiple articles 
+<a href = "https://www.youtube.com/@3blue1brown">
+https://www.3blue1brown.com/topics/neural-networks
+</a>
+
+The MNIST dataset was unavailable for me to get when I made this project, so I used the WayBackMachine. Find it there
+</pre>
+
+</div>
+
+<a href = "index.html">
+    <div class="Button">
+        <h1> Homepage </h1>
+    </div>
+</a>
+</body>
+</html>

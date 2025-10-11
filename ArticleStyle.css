@@ -109,6 +109,9 @@
             align-items: center;
             justify-content: center;
         }
+        a{
+            color: #7d6ffd;
+        }
 
         .container {
     max-width: 900px;  /* limits line length */
