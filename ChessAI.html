@@ -15,9 +15,58 @@ style="display: block; margin: 0 auto; width: 50%; height: auto;">
 </a>
 
 <div class="container">
-<h2>Opening Comments</h2>
+<h2>Introduction</h2>
+<p>
+    	AI in general is one of the most interesting fields of computer science. Because of some math equations and variables, “intelligent”, or at least reasonable, behaviour can occur. AI can really just be thought of as a function, then. It receives an input, does something to it, and then returns an output. Therefore, any AI can be put into 3 parts: input, evaluation, and output.
+Chess AI receives the board position as input, evaluates the board through complex functions, and then outputs the best move. Board position is simple: it’s just where all the pieces are. The best move is also simple: what does the evaluation say the best move is? So, the real question is, how does the AI evaluate the input to get an output?
+</p>
+<h2>Evaluation</h2>
+<p>
+    	To understand how Chess AI evaluates, we first must understand how humans evaluate a chess position. 
+	Humans evaluate a position by “looking ahead”.
+ They would think: “If I do move A, my opponent will do B, C, D, or E. I see that if they respond with B, I’ll be able to checkmate them instantly. If they respond with C or D, I get to take their queen. Yet, if they respond with E, my position will be worse off. I believe that they’ll pick E if I pick A. I don’t want to do move A because my position is worse off (provided that they don’t blunder). So what if I pick a new move for myself, like move F? Their possible response is only G. G is checkmate. I’ll pick G.”
+This long-winded explanation just shows that people evaluate positions by looking at future moves after a certain move. In this situation, the person only looked 1 move ahead. In other situations, people can look a lot further.
+So, a Chess AI would evaluate a position by first picking a move and then looking at future responses to a particular depth (number of moves ahead). 
+Now the next question is, how do you know a position is good or not? Obviously, checkmating the opponent is good, and getting checkmated yourself is bad, but how about checks or captures? 
+Capturing an opponent's piece is good. Losing one yourself is bad. Yet, a queen is more important than a pawn. So a queen should never take a piece less valuable than itself, if the queen were also to be taken. 
+	The skeleton of an evaluation of one particular board state in chess are material. The material value of a piece is based on how good it is. A pawn (the unit of measure) is 1, a knight is 3, a bishop is also 3 (some say 3.15), a rook is 5, a queen is 9, and a king is infinite.
+	For a rudimentary evaluation, the best board position is the one in which I have the most material compared to my opponent. The equation for this evaluation is: white material - black material. So white wants a more positive evaluation while black wants a more negative one.
+	This thinking does work, but there are many scenarios where higher material doesn’t mean an easier win. For example, let’s say the AI is playing white and I’m playing black. The AI has all of its starting pieces but has developed nothing. I have all my starting pieces except for a pawn, but I have developed really well. Who is probably going to win? In most situations, I will win cause I control most of the board.
+	So the AI should favor material and positional advantage. It should develop its pieces. The primary way positional advantage is favored is by securing the position of any piece and then adjusting the material by a small amount, depending on the position. 
+	If I have a pawn that is one square away from promotion, it is more valuable than a pawn stuck on its starting square (in most situations), so I should favor positions where my pawn is close to promotion.
+	If one of my knights has developed but my other one hasn’t, my more developed knight is more important. Therefore, is should favor my more developed knight.
+	If my rook, queen, or bishop is able to target more squares, it is more valuable, so it should be favored more than one that isn’t targeting more squares.
+	In my engine evaluation is just material and positional values. Some people add more, but these two factors already lead to a great engine, provided one more thing. Time complexity. You can have an engine look far ahead with no time optimizations, but that could literally take hours or days, depending on depth. With some simple time optimization, an engine can look ahead more quickly without sacrificing accuracy in outputs. But before learning how time optimizations work, we first must learn how and why move generation time is so big at higher depths.
 
+</p>
+<h2>Exponential Move Growth</h2>
+<p>
+The main reason why Chess engines are extremely slow at higher depths is that predicting moves gets exponentially harder. For example, at the start of a chess game, White has 20 moves, and Black has 20 responses. At just 2 moves, there are already 400 positions. After looking deeper, the results are as follows: (insert wikipedia thang).
+	For each move that is analyzed, the computer runs its evaluation function. Yet, exponential growth means that the number of board positions and thus evaluation costs is also exponential. This leads to an insane amount of computation.
+	A computer can (obviously) compute a lot of numbers, but not even the fastest computers can work quickly at some high depths. With a more optimized algorithm, however, a home computer can rapidly increase its efficiency.
+</p>
+<h2>The Minimax Algorithm</h2>
+<h2>Alpha-Beta Pruning</h2>
+<h2>Move Ordering</h2>
+<p>
+To maximize the effectiveness of alpha-beta pruning, move ordering is essential. Basically, when the computer analyzes the best moves first, it prunes branches quicker, cause it found a more restrictive alpha or beta.
+	The best moves are probably checks, captures, promotions, or castling so those moves should be evaluated first compared to “quieter” moves.
+	In my engine, I make the AI look at captures (my check, promotion, and castling systems really need to be fixed). If an earlier move is really good, it prunes a lot more branches compared to a bad early move.
+</p>
+<h2>Possible Improvements</h2>
+<p>
+    	There are a lot of things that need to be improved with my AI. First off, I use a dual system of legal and pseudolegal moves. Pseudolegal moves are basically all the possible moves that a piece can make, when it disregards checks and checkmate. Generating pseudolegal moves is a lot quicker, but some are illegal. I use a dual system because of time complexity. When I generate legal moves, I look at all the opponent responses, and if any capture the king, then I can’t do that move. This is O(n^2) time complexity (just n * n moves long). 
+	So I make the first couple of analyzed moves legal and the last ones pseudolegal. This makes the AI a lot more vulnerable to checkmate, but I would lose a lot of depth if I made every move legal.
+	Also, the AI can’t really checkmate in an open position (not many pieces left). I will fix this aspect of it in future versions. The best idea is to just reward checks, but (as said earlier) my check generation is really slow.
+	Basically, a fast check generation system is necessary for a fast engine. With faster check generation, I would have a way better engine.
+</p>
 <h2>References and Learning Resources</h2>
+<pre>
+    https://www.youtube.com/watch?v=l-hh51ncgDI&list=WL&index=9
+    https://www.youtube.com/watch?v=U4ogK0MIzqk
+    https://www.youtube.com/watch?v=w4FFX_otR-4
+</pre>
+<h2>My Use of AI</h2>
 <pre>
 
 </pre>
