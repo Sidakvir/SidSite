@@ -22,31 +22,92 @@ Chess AI receives the board position as input, evaluates the board through compl
 </p>
 <h2>Evaluation</h2>
 <p>
-    	To understand how Chess AI evaluates, we first must understand how humans evaluate a chess position. 
+    	To understand how Chess AI evaluates, we first must understand how humans evaluate a Chess position. 
 	Humans evaluate a position by “looking ahead”.
  They would think: “If I do move A, my opponent will do B, C, D, or E. I see that if they respond with B, I’ll be able to checkmate them instantly. If they respond with C or D, I get to take their queen. Yet, if they respond with E, my position will be worse off. I believe that they’ll pick E if I pick A. I don’t want to do move A because my position is worse off (provided that they don’t blunder). So what if I pick a new move for myself, like move F? Their possible response is only G. G is checkmate. I’ll pick G.”
-This long-winded explanation just shows that people evaluate positions by looking at future moves after a certain move. In this situation, the person only looked 1 move ahead. In other situations, people can look a lot further.
-So, a Chess AI would evaluate a position by first picking a move and then looking at future responses to a particular depth (number of moves ahead). 
+This is illustrated in the diagram below. This diagram is known as a tree. The nodes or circles are possible positions, the lines to different positions are moves, the color of the line shows which side is moving.
+Also, the letters in the nodes are just the positions after a move that has the same letter as the letter in the node.
+</p>
+<img src="ChessPics/HumanExampleV3.drawio.png" alt="PruningPG4" 
+style="display: block; margin: 0 auto; width: 80%; height: auto;">
+<p>
+
+ This long-winded explanation just shows that people evaluate positions by looking at future moves after a certain move. In this situation, the person only looked 2 moves ahead. In other situations, people can look a lot further.
+So, a Chess AI would evaluate a position by first picking a move and then looking at future responses to a particular depth or number of moves ahead (moves are one action by either side). 
 Now the next question is, how do you know a position is good or not? Obviously, checkmating the opponent is good, and getting checkmated yourself is bad, but how about checks or captures? 
-Capturing an opponent's piece is good. Losing one yourself is bad. Yet, a queen is more important than a pawn. So a queen should never take a piece less valuable than itself, if the queen were also to be taken. 
-	The skeleton of an evaluation of one particular board state in chess are material. The material value of a piece is based on how good it is. A pawn (the unit of measure) is 1, a knight is 3, a bishop is also 3 (some say 3.15), a rook is 5, a queen is 9, and a king is infinite.
-	For a rudimentary evaluation, the best board position is the one in which I have the most material compared to my opponent. The equation for this evaluation is: white material - black material. So white wants a more positive evaluation while black wants a more negative one.
-	This thinking does work, but there are many scenarios where higher material doesn’t mean an easier win. For example, let’s say the AI is playing white and I’m playing black. The AI has all of its starting pieces but has developed nothing. I have all my starting pieces except for a pawn, but I have developed really well. Who is probably going to win? In most situations, I will win cause I control most of the board.
-	So the AI should favor material and positional advantage. It should develop its pieces. The primary way positional advantage is favored is by securing the position of any piece and then adjusting the material by a small amount, depending on the position. 
+Capturing an opponent's piece is good. Losing one yourself is bad.
+	Thus, the basis of an evaluation of one particular board state in Chess is material. The material value of a piece is based on how good it is. A pawn (the unit of measure) is 1, a knight is 3, a bishop is also 3 (some say 3.15), a rook is 5, a queen is 9, and a king is infinite.
+	For a rudimentary evaluation, the best board position is the one in which I have the most material compared to my opponent. The equation 
+	for this evaluation is: 
+\[
+\text{White Material - Black Material}
+\]
+So White wants a more positive evaluation while Black wants a more negative one.
+	This thinking does work, but there are many scenarios where higher material doesn’t mean an easier win. For example, let’s say the AI is playing White and I’m playing Black. The AI has all of its starting pieces but has developed nothing. I have all my starting pieces except for a pawn, but I have developed really well. Who is probably going to win? In most situations, I will win cause I control most of the board.
+	So the AI should favor material and positional advantage. It should develop its pieces. The primary way positional advantage is favored is by looking at the position of any piece and then adjusting the material by a small amount, depending on the position. 
 	If I have a pawn that is one square away from promotion, it is more valuable than a pawn stuck on its starting square (in most situations), so I should favor positions where my pawn is close to promotion.
-	If one of my knights has developed but my other one hasn’t, my more developed knight is more important. Therefore, is should favor my more developed knight.
-	If my rook, queen, or bishop is able to target more squares, it is more valuable, so it should be favored more than one that isn’t targeting more squares.
-	In my engine evaluation is just material and positional values. Some people add more, but these two factors already lead to a great engine, provided one more thing. Time complexity. You can have an engine look far ahead with no time optimizations, but that could literally take hours or days, depending on depth. With some simple time optimization, an engine can look ahead more quickly without sacrificing accuracy in outputs. But before learning how time optimizations work, we first must learn how and why move generation time is so big at higher depths.
+	If one of my knights has developed but my other one hasn’t, my more developed knight is more important. Therefore, I should favor my more developed knight.
+	If my bishop is able to target more squares, it is more valuable, so it should be favored more than one that isn’t targeting more squares.
+	In my engine, evaluation is just material and positional values. Some people add more, 
+	but these two factors already lead to a great engine, provided one more thing. Time complexity.
+	 You can have an engine look far ahead with no time optimizations, but that could literally take hours for one move at high depths. With some simple time optimization, an engine can look ahead more quickly without sacrificing accuracy in outputs. But before learning how time optimizations work, we first must learn how and why move generation time is so big at higher depths.
 
 </p>
 <h2>Exponential Move Growth</h2>
 <p>
-The main reason why Chess engines are extremely slow at higher depths is that predicting moves gets exponentially harder. For example, at the start of a chess game, White has 20 moves, and Black has 20 responses. At just 2 moves, there are already 400 positions. After looking deeper, the results are as follows: (insert wikipedia thang).
+The main reason why Chess engines are extremely slow at higher depths is that evaluating moves gets exponentially harder. For example, at the start of a Chess game, White has 20 moves, and Black has 20 responses. At just 2 moves, there are already 400 positions. 
+After looking deeper, the results are as follows: </p>
+<img src="ChessPics/Perft_Results.png" alt="Result" 
+style=" display: block; margin: 0 auto; width: 25%; height: auto;">
+<p>
 	For each move that is analyzed, the computer runs its evaluation function. Yet, exponential growth means that the number of board positions and thus evaluation costs is also exponential. This leads to an insane amount of computation.
 	A computer can (obviously) compute a lot of numbers, but not even the fastest computers can work quickly at some high depths. With a more optimized algorithm, however, a home computer can rapidly increase its efficiency.
 </p>
 <h2>The Minimax Algorithm</h2>
+<p>
+		To understand this efficiency problem, we first need to formally analyze how Chess engines think.
+	As explained earlier, a human looks ahead at moves and then decides if that move is good or not, depending on a certain response. An AI thinks in the same way, but with a bit less human randomness and a bit more robot rigidness.
+	Let’s say the AI is White and its opponent is Black. So the AI favours positive evaluations while Black favours negative evaluations. So the AI wants to maximize, and Black wants to minimize, thus the term ‘Minimax’ makes sense. Since the best evaluation for any given player is based on future moves, future moves need to be evaluated first.
+	To start, let’s say the AI will look 3 moves ahead. So White -> Black -> White -> Black. The diagram for this will be:
+The lines represent move choices. The numbers are evaluations. 
+</p>
+<img src="ChessPics/Pruning-PG1.drawio.png" alt="PruningPG1" 
+style=" display: block; margin: 0 auto; width: 80%; height: auto;">
+<img src="ChessPics/Pruning-PG2.drawio.png" alt="PruningPG2" 
+style=" display: block; margin: 0 auto; width: 80%; height: auto;">
+<img src="ChessPics/Pruning-PG3.drawio.png" alt="PruningPG3" 
+style=" display: block; margin: 0 auto; width: 80%; height: auto;">
+<img src="ChessPics/Pruning-PG4.drawio.png" alt="PruningPG4" 
+style="display: block; margin: 0 auto; width: 80%; height: auto;">
+<p>
+	The best move for White in this position is the one that results in 0. If Black strays away from the specific sequence that White sees, Black will be worse off than staying on the sequence (at least in the AI’s eyes). Black and White will therefore follow the sequence for their own goal of winning. So the best move is a result of the worse sequence of moves for the opponent. I will not go into the code for this but I would recommend this video for pseudocode and more understanding 
+	<a href="https://www.youtube.com/watch?v=U4ogK0MIzqk">
+    https://www.youtube.com/watch?v=U4ogK0MIzqk.
+	</a>
+</p>
 <h2>Alpha-Beta Pruning</h2>
+<p>
+		Minimax has one problem, however. It’s inefficient. But with Alpha-Beta Pruning, we increase efficiency by not evaluating extraneous move orders. Also, pruning just means not evaluating a certain branch in a sequence of moves.
+
+ For example, we can look at this:
+
+</p>
+<img src="ChessPics/FinalAlphaBeta.drawio.png" alt="PruningAlphaBetaExample" 
+style="display: block; margin: 0 auto; width: 80%; height: auto;">
+<p>
+	For the ‘4 or more scenario’, we can prune the branches, because the branch with 4 in it will at minimum lead to 4, since White maximizes. Black minimizes, however, so we know that Black would force the move sequence that would lead to 3. 
+
+For the ‘0 or less scenario,’ we can also prune the branches. White already has a guaranteed sequence that would lead to 3 (provided that Black played perfectly), but Black has a sequence that can lead to 0. White won’t want to continue on the possible-0 branch. White picks the 3 branch. 
+The top node in the diagram above would then evaluate to 3.
+Also, the alpha and beta in Alpha-Beta pruning are just the current best values for each colour. 
+Therefore, when we were evaluating the '4 or more' branch, we set beta to 3, because Black would never allow a position better than 3 for White.
+By that same logic, when we evaluated the '0 or less' branch, we saw that 0 was less than the current alpha of 3, so we pruned the rest of the branches.
+
+In addition, explaining the code of Alpha-Beta pruning is out of the scope of this article, but this great video here explains the pseudocode of it:
+ 	<a href="https://www.youtube.com/watch?v=U4ogK0MIzqk">
+    https://www.youtube.com/watch?v=U4ogK0MIzqk
+	</a>
+</p>
 <h2>Move Ordering</h2>
 <p>
 To maximize the effectiveness of alpha-beta pruning, move ordering is essential. Basically, when the computer analyzes the best moves first, it prunes branches quicker, cause it found a more restrictive alpha or beta.
@@ -55,22 +116,43 @@ To maximize the effectiveness of alpha-beta pruning, move ordering is essential.
 </p>
 <h2>Possible Improvements</h2>
 <p>
-    	There are a lot of things that need to be improved with my AI. First off, I use a dual system of legal and pseudolegal moves. Pseudolegal moves are basically all the possible moves that a piece can make, when it disregards checks and checkmate. Generating pseudolegal moves is a lot quicker, but some are illegal. I use a dual system because of time complexity. When I generate legal moves, I look at all the opponent responses, and if any capture the king, then I can’t do that move. This is O(n^2) time complexity (just n * n moves long). 
-	So I make the first couple of analyzed moves legal and the last ones pseudolegal. This makes the AI a lot more vulnerable to checkmate, but I would lose a lot of depth if I made every move legal.
+    	There are a lot of things that need to be improved with my AI. First off, I use a dual system of legal and pseudolegal moves. Pseudolegal moves are basically all the possible moves that a piece can make, when it disregards checks and checkmate. Generating pseudolegal moves is a lot quicker, but some are illegal. I use a dual system because of time complexity. When I generate legal moves, I look at all the opponent responses, and if any capture the king, then I can’t do that move. 
+So if the amount of moves is n, and the amount of enemy response is m it takes (time to generate one move) * n * m time to generate a legal move.
+This is time complexity:
+\[
+O(n * m)
+\]
 	Also, the AI can’t really checkmate in an open position (not many pieces left). I will fix this aspect of it in future versions. The best idea is to just reward checks, but (as said earlier) my check generation is really slow.
 	Basically, a fast check generation system is necessary for a fast engine. With faster check generation, I would have a way better engine.
 </p>
 <h2>References and Learning Resources</h2>
 <pre>
-    https://www.youtube.com/watch?v=l-hh51ncgDI&list=WL&index=9
+    The video that got me interested in Chess engines (by the GOAT Sebastian Lague):
+	<a href="https://www.youtube.com/watch?v=U4ogK0MIzqk">
     https://www.youtube.com/watch?v=U4ogK0MIzqk
+	</a>
+    A great explanation of Alpha-Beta Pruning and Minimax:
+	<a href="https://www.youtube.com/watch?v=l-hh51ncgDI&list=WL&index=9">
+    https://www.youtube.com/watch?v=l-hh51ncgDI&list=WL&index=9
+	</a>
+    Another great video on Chess engines and how they work:
+	<a href="https://www.youtube.com/watch?v=w4FFX_otR-4">
     https://www.youtube.com/watch?v=w4FFX_otR-4
+	</a>
+    This Wikipedia page shows a lot of information on computer Chess in general:
+	<a href="https://en.wikipedia.org/wiki/Computer_chess">
+    https://en.wikipedia.org/wiki/Computer_chess
+	</a>
+    This page shows the amount of positions at each depth (used in the exponential move growth section):
+	<a href="https://www.chessprogramming.org/Perft_Results">
+    https://www.chessprogramming.org/Perft_Results
+	</a>
 </pre>
 <h2>My Use of AI</h2>
 <p>
-Like many of my projects before, I did use AI for this one. Though I will say that I came back from this project having learned and understood things I would have never known. Thank you for reading!
-</p>
-
+Like many of my projects before, I did use AI for this one. When I didn't understand something I would ask a chatbot for help. Debugging and hard algorithms were sped up and made possible by AI. 
+I have learned a lot from this project, and I would recommend looking into Chess engines if you are interested in AI, math, or just programming in general.
+Thank you for reading!
 </div>
 
 <a href = "index.html">
